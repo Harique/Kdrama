@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Discord;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using Discord.Commands;
-using System.Reflection;
-using snipetrain_bot.Modules;
+using Kdrama.Modules;
 using Microsoft.Extensions.Configuration;
-using snipetrain_bot.Services;
 
-namespace snipetrain_bot
+namespace Kdrama
 {
     public class DiscordRunner
     {
@@ -18,26 +14,21 @@ namespace snipetrain_bot
         private CommandService _commands;
         private IServiceProvider _services;
         private IConfiguration _config;
-        private readonly ITwitchService _twitchService;
         private SocketGuild Guild;
 
-        public DiscordRunner(ITwitchService twitchService, IConfiguration config)
+        public DiscordRunner(IConfiguration config)
         {
             _commands = new CommandService();
-            _twitchService = twitchService;
             _config = config;
         }
 
         public async Task StartClient(IServiceProvider services)
         {
             _services = services;
-            
+
             _client = new DiscordSocketClient();
 
             await InstallCommandsAsync();
-
-            await _twitchService.AuthenticateTwitch();
-            await _twitchService.AddAllTwitchSubscriptions();
 
             await _client.LoginAsync(TokenType.Bot, _config.GetSection("discord")["token"]);
             await _client.StartAsync();
@@ -53,18 +44,14 @@ namespace snipetrain_bot
         {
             _client.MessageReceived += HandleCommand;
             _client.ReactionAdded += OnReactionUp;
-            _client.ReactionRemoved += OnReactionDown;
             _client.GuildAvailable += OnGuildAvailable;
             
-            await _commands.AddModuleAsync<RankModule>(_services);
-            await _commands.AddModuleAsync<StreamModule>(_services);
-            await _commands.AddModuleAsync<PartyModule>(_services);
             await _commands.AddModuleAsync<PermModule>(_services);
-            
+
         }
 
         public async Task OnGuildAvailable(SocketGuild guild)
-        {  
+        {
             Guild = guild;
         }
 
@@ -72,14 +59,14 @@ namespace snipetrain_bot
         {
             try
             {
-                var socketChannel = _client.GetChannel(channelId) as IMessageChannel; 
+                var socketChannel = _client.GetChannel(channelId) as IMessageChannel;
                 return await socketChannel.SendMessageAsync(message);
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Error while trying to send Message to Channel :: {e.ToString()}");
                 return null;
-            } 
+            }
         }
 
         public async Task<IMessage> SendDMMessage(string message, IUser user)
@@ -92,7 +79,7 @@ namespace snipetrain_bot
             {
                 Console.WriteLine($"Error while trying to send Message to Channel :: {e.ToString()}");
                 return null;
-            } 
+            }
         }
 
         public async Task OnReactionUp(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
@@ -103,11 +90,11 @@ namespace snipetrain_bot
                 var messageId = ulong.Parse(_config.GetSection("discord").GetSection("messages")["streamReaction"]);
                 var reactionCode = _config.GetSection("discord").GetSection("emotes")["stream"];
 
-                if (message.Id == messageId && reaction.Emote.Name == reactionCode) 
+                if (message.Id == messageId && reaction.Emote.Name == reactionCode)
                 {
                     var role = Guild.GetRole(ulong.Parse(_config.GetSection("discord").GetSection("roles").GetSection("stream")["id"]));
                     var guildUser = Guild.GetUser(reaction.UserId);
-                    
+
                     await (guildUser as IGuildUser).AddRoleAsync(role);
                     await SendDMMessage($"Successfully Added you to the <{role.Name}> Role.", guildUser);
                 }
@@ -117,30 +104,11 @@ namespace snipetrain_bot
                 Console.WriteLine(e.ToString());
             }
 
-        } 
-
-        public async Task OnReactionDown(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
-        {
-            try
-            {
-                if (message.Id == ulong.Parse(_config.GetSection("discord").GetSection("messages")["streamReaction"]))
-                {
-                    var role = Guild.GetRole(ulong.Parse(_config.GetSection("discord").GetSection("roles").GetSection("stream")["id"]));
-                    var guildUser = Guild.GetUser(reaction.UserId);
-                    
-                    await (guildUser as IGuildUser).RemoveRoleAsync(role);
-                    await SendDMMessage($"Successfully Removed you from the <{role.Name}> Role.", guildUser);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
         }
-
+        
         public async Task HandleCommand(SocketMessage messageParam)
         {
-            
+
             var message = messageParam as SocketUserMessage;
             if (message == null) return;
 

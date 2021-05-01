@@ -4,10 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using snipetrain_bot.HostedServices;
-using snipetrain_bot.Services;
+using Kdrama.Services;
 
-namespace snipetrain_bot
+namespace Kdrama
 {
     class Program
     {
@@ -38,16 +37,11 @@ namespace snipetrain_bot
             Host.CreateDefaultBuilder(args)
             .ConfigureServices((hostContext, services) =>
             {
-                services.AddScoped<ISnipetrainService, SnipetrainService>();
-                services.AddScoped<IStreamersService, StreamersService>();
-                services.AddScoped<IPartyService, PartyService>();
                 services.AddScoped<IPermService, PermService>();
-
-                services.AddSingleton<ITwitchService, TwitchService>();
+                
                 services.AddSingleton<IConfiguration>(configuration);
                 services.AddSingleton<DiscordRunner>();
-
-                services.AddHostedService<ScheduledPartyHostedService>();
+                
             });
     }
 }
