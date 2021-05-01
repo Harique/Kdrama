@@ -1,17 +1,16 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using snipetrain_bot.Models;
+using Kdrama.Models;
 using Discord;
 
-namespace snipetrain_bot.Services
+namespace Kdrama.Services
 {
     public interface IPermService
     {
-        Task AddKickAsync(PermissionSchema model);
-        Task AddBanAsync(PermissionSchema model);
         Task AddWarnAsync(PermissionSchema model);
         Task<List<PermissionSchema>> GetDocsAsync();
         Task<long> GetDocsAsync(IGuildUser user);
+        Task RemoveDocAsync(string user);
 
     }
 }
