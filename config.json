@@ -2,7 +2,7 @@
     "prefixChar": "!",
     
     "discord": {
-        "token": "NzcyNDk2MTk4MDczODQzNzMy.X57hJQ.zoe0LCaRfNFvMDTbwszEoFOrrMY",
+        "token": "",
         "roles": {
             "Gulag": {
                 "id": "272441218548629504"
