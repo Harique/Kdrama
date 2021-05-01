@@ -2,7 +2,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 
-namespace snipetrain_bot.Models
+namespace Kdrama.Models
 {
     public class PermissionSchema
     {
@@ -12,12 +12,10 @@ namespace snipetrain_bot.Models
         [BsonElement("Admin")]
         public string AdminName { get; set; }
         [BsonElement("Date")]
-        public DateTimeOffset Date { get; set; }
+        public DateTime Date { get; set; }
         [BsonElement("Reason")]
         public string Reason { get; set; }
         [BsonElement("User")]
         public string User { get; set; }
-        [BsonElement("UserId")]
-        public ulong UserId { get; set; }
     }
 }
